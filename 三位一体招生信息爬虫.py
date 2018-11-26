@@ -5,15 +5,14 @@ import openpyxl
 from bs4 import BeautifulSoup
 
 
-def get_response(url):
-    r"""Get the response of the URL
-
-    :param url: the url of the response
-    :type url: str
-    :return: :class:`Response <Response>` object
-    :rtype: requests.Response
+def get_html(url):
     """
-
+    Get the html content of a web page with the passed url
+    :param url: the url of a web page
+    :type url: str
+    :return: : the html content of the web page
+    :rtype: str
+    """
     try:
         headers = {
             'User-Agent':
@@ -25,47 +24,57 @@ def get_response(url):
         response.encoding = 'utf-8'
         # Check whether the request for this web page succeeded
         if response.status_code == requests.codes.ok:
-            print(f"Request of {url} succeeded")
-            return response
+            print(f"Request {url}. Done.")
+            return response.text
         else:
-            print(f"Request of {url} failed")
+            print(f"Request{url}. Failed")
             return None
     except requests.RequestException:
-        print(f"Request of {url} failed")
+        print(f"Request {url}. Failed")
         return None
 
 
-def parse_homepage(response):
-    r"""Parse the form of the homepage
+def get_homepage_html():
+    """
+    Get the html content of the homepage (http://www.eol.cn/html/g/zjswyt/)
+    :return: the html content of the homepage
+    :rtype: str
+    """
+    homepage_url = 'http://www.eol.cn/html/g/zjswyt/'
+    return get_html(homepage_url)
 
-    :param response: :class:`Response <response>` object
-    :type response: requests.Response
+
+def parse_homepage(html):
+    """
+    Parse the form of the homepage
+    :param html: the html content of the homepage
+    :type: str
     :return: a generator that generates a dictionary containing a school's name and its corresponding date and url
     :rtype: generator
     """
-
     # Create a BeautifulSoup object using the parser html5lib
-    soup = BeautifulSoup(response.text, features='html5lib')
+    soup = BeautifulSoup(html, features='html5lib')
     # Perform a CSS selection on the BeautifulSoup element to get all the cells of the form
     cells = soup.select('.willnum-body > table > tbody > tr > td')
-    # Loop through every row in the form
     print("Retrieving data from the sheet")
+    # Loop through every row in the form
     for i in range(3, len(cells), 3):
         try:
             # Get the text of the first column, the university's name
             name = cells[i].string
-            # Get the text of the second column, the university's application date
-            date = cells[i + 1].string
-            # Get the reference of the text of the third column, the university's admission info's link
-            link = cells[i + 2].find('a')['href']
-
-            print(name, date, link)
-
-            yield {
-                'name': name,
-                'date': date,
-                'link': link
-            }
+            if name != '中国美术学院':
+                # Get the text of the second column, the university's application date
+                date = cells[i + 1].string
+                # Get the reference of the text of the third column, the university's admission info's link
+                link = cells[i + 2].find('a')['href']
+                print(name, date, link)
+                yield {
+                    'name': name,
+                    'date': date,
+                    'link': link
+                }
+            else:
+                print('中国美术学院 is excluded')
         # Handle the TypeError exception that occurs when no link or date is provided
         except TypeError:
             print(f"No date, link or both of the school {name} provided")
@@ -73,16 +82,15 @@ def parse_homepage(response):
             pass
 
 
-def write_to_excel(generator, fname):
-    r"""Write the information to an excel form
-
+def write_homepage_form_to_excel(generator, fname):
+    """
+    Write the information to an excel form
     :param generator: a generator that generates a dictionary containing the school's name and its corresponding date\
      and url
     :type generator: generator
     :param fname: the name of the created excel file
     :type fname: str
     """
-
     wb = openpyxl.Workbook()
     sheet = wb.active
     sheet.title = '报考简章'
@@ -100,10 +108,23 @@ def write_to_excel(generator, fname):
     print(f"{fname}.xlsx saved")
 
 
-if __name__ == '__main__':
-    homepage_url = 'http://www.eol.cn/html/g/zjswyt/'
-    # Download
-    homepage_response = get_response(homepage_url)
-    school_generator = parse_homepage(homepage_response)
-    write_to_excel(school_generator, "浙江省2019年三位一体招生信息")
+def get_link(school_name):
+    pass
 
+
+def get_admission_guide(link):
+    pass
+
+
+def parse_admission_guide(html):
+    pass
+
+
+def write_admission_guide_to_excel():
+    pass
+
+
+if __name__ == '__main__':
+    homepage_html = get_homepage_html()
+    school_generator = parse_homepage(homepage_html)
+    write_homepage_form_to_excel(school_generator, "浙江省2019年三位一体招生信息")
