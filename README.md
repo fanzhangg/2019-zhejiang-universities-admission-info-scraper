@@ -13,6 +13,24 @@
     - CHANGE: The format of docstrings
     - CHANGE: Some variable and arguments names
     - ADD: A bunch of printings lines for debugging and tracing the running of the program
+    
+- v0.0.2
+    - ADD: Update README.md
+    - CHANGE: Delete some useless files
+
+- v1.0.0
+    - Fixed: Exclude 中国美术学院 to write to the excel
+    - ADD: Function get_link(school_name)
+    - ADD: Function get_admission_guide(link)
+    - ADD: Function parse_admission_guide(html)
+    - ADD: Function write_admission_guide_to_cvs()
+
+- v1.1.0
+    - CHANGE: The name of the file "三位一体招生信息爬虫.py" to "admission_info_crawler"
+    - Add: File test_admission_info_crawler.py
+    
+- v1.1.1
+    - UPDATE: The version in README.md
 
 ## Contact
 **Fan Zhang**
