@@ -1,8 +1,13 @@
 # -*-coding: utf-8 -*-
+__author__ = 'Fan Zhang'
+__project__ = '三位一体招生信息爬虫'
 
 import requests
 import openpyxl
 from bs4 import BeautifulSoup
+
+# a global variable to store the name of schools
+school_names = []
 
 
 def get_html(url):
@@ -68,6 +73,8 @@ def parse_homepage(html):
                 # Get the reference of the text of the third column, the university's admission info's link
                 link = cells[i + 2].find('a')['href']
                 print(name, date, link)
+                # Extend the name to the list stored in the global variable `school_names`
+                school_names.append(name)
                 yield {
                     'name': name,
                     'date': date,
@@ -109,11 +116,43 @@ def write_homepage_form_to_excel(generator, fname):
 
 
 def get_link(school_name):
-    pass
+    """
+    Get the the admission guide link of the school with the passed name
+    :param school_name: the name of the school
+    :type school_name: str
+    :return: the admission guide link
+    :rtype: str
+    """
+    wb = openpyxl.load_workbook('浙江省2019年三位一体招生信息.xlsx')
+    ws = wb.active
+    row = school_names.index(school_name) + 2
+    return ws.cell(row=row, column=3).value
 
 
-def get_admission_guide(link):
-    pass
+def get_admission_guide(url):
+    """
+    Get the content of admission guide
+    :param url: the url of the first page of the admission guide
+    :type url: str
+    :return: the content of admission guide
+    :rtype: str
+    """
+    admission_guide = ''
+    page_index = 0
+    # Get the html content of the first page
+    page_one_html = get_html(url)
+    "".join((admission_guide, page_one_html))
+    while True:
+        page_index += 1
+        pos = url.index('.shtml')
+        page_url = ''.join((url[:pos], '_', str(page_index), url[pos:]))
+        page_html = get_html(page_url)
+        print(page_html)
+        if page_index <= 5:
+            ''.join((admission_guide, page_html))
+        else:
+            break
+    return admission_guide
 
 
 def parse_admission_guide(html):
@@ -128,3 +167,6 @@ if __name__ == '__main__':
     homepage_html = get_homepage_html()
     school_generator = parse_homepage(homepage_html)
     write_homepage_form_to_excel(school_generator, "浙江省2019年三位一体招生信息")
+    assert get_link('浙江工业大学') == 'http://gaokao.eol.cn/zhe_jiang/dongtai/201802/t20180211_1585545.shtml'
+    school_url = get_link('浙江工业大学')
+    print(get_admission_guide(school_url))
