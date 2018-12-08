@@ -5,9 +5,13 @@ __project__ = '三位一体招生信息爬虫'
 import requests
 import openpyxl
 from bs4 import BeautifulSoup
+from xml import etree
 
 # a global variable to store the name of schools
 school_names = []
+# a global variable to store the workbook to record the school info
+wb = openpyxl.Workbook()
+sheet = wb.active
 
 
 def get_html(url):
@@ -98,8 +102,6 @@ def write_homepage_form_to_excel(generator, fname):
     :param fname: the name of the created excel file
     :type fname: str
     """
-    wb = openpyxl.Workbook()
-    sheet = wb.active
     sheet.title = '报考简章'
     sheet.cell(row=1, column=1).value = '高校名单'
     sheet.cell(row=1, column=2).value = '报名时间'
@@ -129,6 +131,30 @@ def get_link(school_name):
     return ws.cell(row=row, column=3).value
 
 
+def get_one_page_admission_guide(url):
+    """
+    Get the content of one page of the admission guide
+    :param url: the url of the web page
+    :type url: str
+    :return: the content of on page of the admission guide
+    :rtype: str
+    """
+    text = ""
+    html = get_html(url)
+    # Create a BeautifulSoup object using the parser html5lib
+    soup = BeautifulSoup(html, features='html5lib')
+    # Perform a CSS selection on the BeautifulSoup element to get all the cells of the form
+    tags = soup.select('.TRS_Editor > p')
+    for tag in tags:
+        text = ''.join((text, tag.text, '\n'))
+    if text:
+        print(text)
+        return text
+    else:
+        print("No data retrieved from the page")
+        return None
+
+
 def get_admission_guide(url):
     """
     Get the content of admission guide
@@ -137,22 +163,26 @@ def get_admission_guide(url):
     :return: the content of admission guide
     :rtype: str
     """
-    admission_guide = ''
-    page_index = 0
+    text = ''
+    index = 0
+    page_url = url
+    pos = url.index('.shtml')
     # Get the html content of the first page
-    page_one_html = get_html(url)
-    "".join((admission_guide, page_one_html))
+    page_1_text = get_one_page_admission_guide(page_url)
+    # print(page_1_text)
+    # print(type(page_1_text))
+    text = "".join((text, page_1_text))
     while True:
-        page_index += 1
-        pos = url.index('.shtml')
-        page_url = ''.join((url[:pos], '_', str(page_index), url[pos:]))
-        page_html = get_html(page_url)
-        print(page_html)
-        if page_index <= 5:
-            ''.join((admission_guide, page_html))
-        else:
+        index += 1
+        page_url = ''.join((url[:pos], '_', str(index), url[pos:]))
+        page_text = get_one_page_admission_guide(page_url)
+        # print(page_text)
+        if page_text is None:
+            print("Retrieve admission info guide. Done.")
             break
-    return admission_guide
+        else:
+            text = ''.join((text, page_text))
+    return text
 
 
 def parse_admission_guide(html):
@@ -164,9 +194,10 @@ def write_admission_guide_to_excel():
 
 
 if __name__ == '__main__':
-    homepage_html = get_homepage_html()
-    school_generator = parse_homepage(homepage_html)
-    write_homepage_form_to_excel(school_generator, "浙江省2019年三位一体招生信息")
-    assert get_link('浙江工业大学') == 'http://gaokao.eol.cn/zhe_jiang/dongtai/201802/t20180211_1585545.shtml'
-    school_url = get_link('浙江工业大学')
-    print(get_admission_guide(school_url))
+    # homepage_html = get_homepage_html()
+    # school_generator = parse_homepage(homepage_html)
+    # write_homepage_form_to_excel(school_generator, "浙江省2019年三位一体招生信息")
+    # admin_guide = get_admission_guide("http://gaokao.eol.cn/zhe_jiang/dongtai/201802/t20180211_1585545.shtml")
+    # print(admin_guide)
+    admin_guide = get_admission_guide("http://gaokao.eol.cn/zhe_jiang/dongtai/201802/t20180211_1585545.shtml")
+    print(admin_guide)

@@ -6,8 +6,10 @@
 
 ## Version
 - 0.0.0
-    - ADD:使用requests下载网页
-    - ADD:使用BeautifulSoap爬取表格中的学校名称，报考时间，网址，并存入一个`list`
+    - ADD: Method get_html
+    - ADD: Method get_homepage_html
+    - ADD: Method parse_homepage
+    - ADD: Method write_homepage_form_to_excel
     
 - 0.0.1
     - CHANGE: The format of docstrings
@@ -15,22 +17,22 @@
     - ADD: A bunch of printings lines for debugging and tracing the running of the program
     
 - v0.0.2
-    - ADD: Update README.md
     - CHANGE: Delete some useless files
 
 - v1.0.0
     - Fixed: Exclude 中国美术学院 to write to the excel
-    - ADD: Function get_link(school_name)
-    - ADD: Function get_admission_guide(link)
-    - ADD: Function parse_admission_guide(html)
-    - ADD: Function write_admission_guide_to_cvs()
+    - ADD: Method get_link(school_name)
+    - ADD: Method get_admission_guide(link)
+    - ADD: Method parse_admission_guide(html)
+    - ADD: Method write_admission_guide_to_cvs()
 
 - v1.1.0
     - CHANGE: The name of the file "三位一体招生信息爬虫.py" to "admission_info_crawler"
     - Add: File test_admission_info_crawler.py
     
-- v1.1.1
-    - UPDATE: The version in README.md
+- v1.2.0
+    - CHANGE: Method get_admission_guide
+    - ADD: Method get_one_page_admission_guide 
 
 ## Contact
 **Fan Zhang**

@@ -52,6 +52,18 @@ class TesCrawler(unittest.TestCase):
         """
         Test case function to check the write_homepage_form_to_excel
         """
+        sheet = crawler.sheet
+
+        # Test if the header is successfully recorded
+        self.assertEqual(sheet.cell(row=1, column=1).value, "高校名单")
+        self.assertEqual(sheet.cell(row=1, column=2).value, "报名时间")
+        self.assertEqual(sheet.cell(row=1, column=3).value, "招生简章")
+        self.assertEqual(sheet.cell(row=2, column=1).value, "浙江工业大学")
+        self.assertEqual(sheet.cell(row=2, column=2).value, "3月5日-3月10日")
+        self.assertEqual(sheet.cell(row=2, column=3).value,
+                         "http://gaokao.eol.cn/zhe_jiang/dongtai/201802/t20180211_1585545、"
+                         ".shtml")
+
         print("Start write_homepage_form_to_excel test")
 
 
